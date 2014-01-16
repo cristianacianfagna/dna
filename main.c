@@ -30,8 +30,8 @@ typedef struct frammento frammento;
 
 struct tabella_costo {
 	char *nome_en; /* nome enzima  */
-	int costo; /* unita' elementari di energia richiesta dall'enzima per attivarsi */
-	int moltiplicatore; /*  valore da usare nel caso in cui il costo vari in base all'ultimo carattere dell'enzima  tipo di enzima: 1 se cambia o 0 altrimenti */
+	char *costo; /* unita' elementari di energia richiesta dall'enzima per attivarsi */
+	char *moltiplicatore; /*  valore da usare nel caso in cui il costo vari in base all'ultimo carattere dell'enzima  tipo di enzima: 1 se cambia o 0 altrimenti */
 	struct tabella_costo *next; /* puntatore all'enzima successivo */
 };
 typedef struct tabella_costo tabella_costo;
@@ -54,7 +54,7 @@ struct esperimento {
 typedef struct esperimento esperimento;
 
 //creo una nuova cava nella lista passandogli la testa della lista e le coordinate
-tabella_costo* crea_tab_costi(char *nome, int costo, int molt, tabella_costo *t){
+tabella_costo* crea_tab_costi(char *nome, char *costo, char *molt, tabella_costo *t){
 
 	tabella_costo *nuovo_el;
 
@@ -98,7 +98,8 @@ tabella_costo *readword(char *nomefile, char **en){
 
 	//creo la tabella (lista concatenata) passandogli i valori letti dal file
 	for(i=0; i<j; i+=3){
-		//printf("en[i] punta a: %s \n", en[i]);
+		printf("en[i] punta a: %s \n", en[i]);
+		printf("en[i+1] punta a: %s \n", en[i+1]);
 		tab_costi=crea_tab_costi(en[i], en[i+1], en[i+2], tab_costi);
 	}
 
@@ -112,7 +113,7 @@ void printList_TC(tabella_costo *testa){
 	p=testa;
 	printf("La tabella e' formata dai seguenti enzimi\n");
 	for (p=testa; p != NULL; p = p->next){
-		printf("%s %d %d\n", p->nome_en, p->costo, p->moltiplicatore );
+		printf("%s %s %s\n", p->nome_en, p->costo, p->moltiplicatore);
 	}
 	printf("\n");
 }
