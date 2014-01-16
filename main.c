@@ -8,6 +8,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <limits.h>
+#define N 10
 
 
 struct enzima {
@@ -49,11 +51,48 @@ struct esperimento {
 	istante *ist; /* puntatore all'istante 0 dell'esperimento */
 	int tempo;  /* durata massima esperimento */
 };
-typedef struct istante istante;
+typedef struct esperimento esperimento;
+
+/* funzione che legge dei caratteri e restituisce il puntatore alla stringa */
+void readword(char *nomefile, char *en[N]){
+	char ch;
+	char *stringa;
+	int i=0, j;
+	FILE *file;
+
+	file=fopen(nomefile,"r");
+
+	for (j=0; j<N; j++) {
+		stringa=malloc(sizeof(char));
+		while ((ch=fgetc(file)) != ' '){
+			stringa[i]=ch;
+			if (ch=='\n'){
+				stringa[i]='\0';
+			}
+			i++;
+			stringa=realloc(stringa, i+1*sizeof(char));
+			if (ch=='.'){
+				//stringa[i]='\0';
+				break;
+			}
+		}
+		stringa[i]='\0';
+		printf("ciao\n");
+		en[j]=stringa;
+		printf("parola: %s", stringa);
+	}
+
+
+	//fclose(file);
+	//return stringa;
+}
 
 /*funzione inizializza che:
 legge dal file i costi e crea tabella_costo
 */
+
+
+
 
 /*
  prepara_esperimento:
@@ -70,6 +109,17 @@ legge dal file i costi e crea tabella_costo
 
 
 int main (int argc, char *argv[]) {
+	char *enzimi[N];
+	int i;
 
 
+	readword(argv[1], enzimi);
+
+
+	for (i=0; i<N; i++) {
+		printf("%s\n", enzimi[i]);
+	}
+
+
+	return 1;
 }
