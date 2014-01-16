@@ -53,38 +53,26 @@ struct esperimento {
 };
 typedef struct esperimento esperimento;
 
-/* funzione che legge dei caratteri e restituisce il puntatore alla stringa */
-void readword(char *nomefile, char *en[N]){
+/* funzione che legge dei caratteri e restituisce l'ultima posizione */
+int readword(char *nomefile, char **en){
 	char ch;
 	char *stringa;
-	int i=0, j;
+	int i=0, j=0;
 	FILE *file;
 
 	file=fopen(nomefile,"r");
-
-	for (j=0; j<N; j++) {
-		stringa=malloc(sizeof(char));
-		while ((ch=fgetc(file)) != ' '){
-			stringa[i]=ch;
-			if (ch=='\n'){
-				stringa[i]='\0';
-			}
-			i++;
-			stringa=realloc(stringa, i+1*sizeof(char));
-			if (ch=='.'){
-				//stringa[i]='\0';
-				break;
-			}
-		}
-		stringa[i]='\0';
-		printf("ciao\n");
-		en[j]=stringa;
-		printf("parola: %s", stringa);
+	stringa=malloc(sizeof(char));
+	while ((ch=fgetc(file)) != EOF){
+		stringa[i]=ch;
+		i++;
+		stringa=realloc(stringa, i+1*sizeof(char));
 	}
+	stringa[i]='\0';
+	en[j]=stringa;
+	j++;
 
-
-	//fclose(file);
-	//return stringa;
+	fclose(file);
+	return j;
 }
 
 /*funzione inizializza che:
@@ -110,13 +98,12 @@ legge dal file i costi e crea tabella_costo
 
 int main (int argc, char *argv[]) {
 	char *enzimi[N];
-	int i;
+	int i, j;
 
-
-	readword(argv[1], enzimi);
-
-
-	for (i=0; i<N; i++) {
+	//leggo file "tabella_costi" passato al main
+	j=readword(argv[1], enzimi);
+	//stampa di verifica del file "tabella costi" letto
+	for (i=0; i<j; i++) {
 		printf("%s\n", enzimi[i]);
 	}
 
