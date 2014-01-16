@@ -1,1 +1,3 @@
-rovesciasi insertasi troncasi fine.
+rovesciasi 9 0
+insertasi 3 0
+troncasi 2 0
