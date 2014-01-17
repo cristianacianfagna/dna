@@ -9,7 +9,8 @@
 #include <string.h>
 #include <stdlib.h>
 #include <limits.h>
-#define N 8
+#define E 8
+#define N 10
 
 
 struct enzima {
@@ -27,6 +28,12 @@ struct frammento {
 	struct frammento *next; /* puntatore al frammento successivo */
 };
 typedef struct frammento frammento;
+
+struct provetta {
+	frammento *fr; /* nucleotidi che formano il frammento */
+	enzima *en; /* puntatore all'enzima attaccato al frammento*/
+};
+typedef struct provetta provetta;
 
 struct tabella_costo {
 	char *nome_en; /* nome enzima  */
@@ -53,22 +60,23 @@ struct esperimento {
 };
 typedef struct esperimento esperimento;
 
-//creo una nuova cava nella lista passandogli la testa della lista e le coordinate
+//creo una nuova tabella passandogli la testa della tabella e i dati di ogni enzima
 tabella_costo* crea_tab_costi(char *nome, char *costo, char *molt, tabella_costo *t){
-
 	tabella_costo *nuovo_el;
-
 	nuovo_el=malloc(sizeof(tabella_costo));
 	nuovo_el->nome_en=nome;
 	nuovo_el ->costo=costo;
 	nuovo_el ->moltiplicatore=molt;
 	nuovo_el ->next=t;
 	return nuovo_el;
-
 }
 
-/* funzione che legge dei caratteri e restituisce l'ultima posizione */
-tabella_costo *readword(char *nomefile, char **en){
+/* funzione che legge dei caratteri (allocandoli dinamicamente) dal file tabella_costi.txt (passato come primo argomento)
+e memorizza le varie stringhe in un puntatore di puntatore a caratteri
+passa i valori letti alla funzione crea_tab_costi che restituisce il puntatore alla tabella creata */
+tabella_costo *leggi_TC(char *nomefile, char **en){
+/* *nomefile: nome del file (primo argomento del main) */
+/* **en: puntatore agli enzimi che verranno letti */
 	char ch;
 	char *stringa;
 	int i=0, j=0;
@@ -76,35 +84,87 @@ tabella_costo *readword(char *nomefile, char **en){
 	tabella_costo *tab_costi=NULL;
 
 	file=fopen(nomefile,"r");
-	for (j=0; j<N; j++){
+	for (j=0; j<E; j++){
 		i=0;
+		//leggo la prima stringa allocandola dinamicamente
 		stringa=malloc(sizeof(char));
+		//fino al primo spazio
 		while ((ch=fgetc(file)) != ' '){
 			stringa[i]=ch;
 			if (ch=='\n'){
 				stringa[i]='\0';
 				break;
 			}
-			//printf(" stringa[i]: %c - i:%d\n", stringa[i], i);
+			//vado alla posizione successiva e rialloco un carattere alla volta
 			i++;
 			stringa=realloc(stringa, i+1*sizeof(char));
 		}
 		stringa[i]='\0';
+		//memorizzo la stringa letta in en[0], poi en[1] etc..
 		en[j]=stringa;
-		//printf("en[j] punta a: %s j:%d\n", en[j], j);
-		//j++;
 	}
-	//printf("\n j: %d \n", j);
 
 	//creo la tabella (lista concatenata) passandogli i valori letti dal file
 	for(i=0; i<j; i+=3){
-		printf("en[i] punta a: %s \n", en[i]);
-		printf("en[i+1] punta a: %s \n", en[i+1]);
 		tab_costi=crea_tab_costi(en[i], en[i+1], en[i+2], tab_costi);
 	}
-
+	free(stringa);
 	fclose(file);
 	return tab_costi;
+}
+
+
+//creo una nuova tabella passandogli la testa della tabella e i dati di ogni frammento
+frammento* crea_frammenti(char *nome, tabella_costo *t){
+	tabella_costo *nuovo_el;
+	nuovo_el=malloc(sizeof(tabella_costo));
+	nuovo_el->nome_en=nome;
+	nuovo_el ->costo=costo;
+	nuovo_el ->moltiplicatore=molt;
+	nuovo_el ->next=t;
+	return nuovo_el;
+}
+
+/* funzione che legge dei caratteri (allocandoli dinamicamente) dal file frammenti_file.txt (passato come secondo argomento)
+e memorizza le varie stringhe in un puntatore di puntatore a caratteri
+passa i valori letti alla funzione crea_frammenti che restituisce il puntatore al primo frammento */
+tabella_costo *leggi_F(char *nomefile, char **frammenti){
+/* *nomefile: nome del file (secondo argomento del main) */
+/* **en: puntatore agli enzimi che verranno letti */
+	char ch;
+	char *stringa;
+	int i=0, j=0;
+	FILE *file;
+	frammento *fr=NULL;
+
+	file=fopen(nomefile,"r");
+	for (j=0; j<N; j++){
+		i=0;
+		//leggo la prima stringa allocandola dinamicamente
+		stringa=malloc(sizeof(char));
+		//fino al primo spazio
+		while ((ch=fgetc(file)) != ' '){
+			stringa[i]=ch;
+			if (ch=='\n'){
+				stringa[i]='\0';
+				break;
+			}
+			//vado alla posizione successiva e rialloco un carattere alla volta
+			i++;
+			stringa=realloc(stringa, i+1*sizeof(char));
+		}
+		stringa[i]='\0';
+		//memorizzo la stringa letta in en[0], poi en[1] etc..
+		frammenti[j]=stringa;
+	}
+
+	//creo la tabella (lista concatenata) passandogli i valori letti dal file
+	for(i=0; i<j; i++){
+		frammenti=crea_frammenti(frammenti[i], fr);
+	}
+	free(stringa);
+	fclose(file);
+	return frammenti;
 }
 
 //stampa la lista partendo dalla cava (in realt dal sito) che passo
@@ -142,13 +202,14 @@ legge dal file i costi e crea tabella_costo
 
 
 int main (int argc, char *argv[]) {
-	char *enzimi[N];
-	//int i, j;
+	char *enzimi[E];
+	char *frammenti[N];
+
 	tabella_costo *tab=NULL;
+	frammento *frammenti=NULL;
 
 	//leggo file "tabella_costi" passato al main
-	tab=readword(argv[1], enzimi);
-
+	tab=leggi_TC(argv[1], enzimi);
 	printList_TC(tab);
 
 
