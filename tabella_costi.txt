@@ -1,3 +1,4 @@
-rovesciasi 9 0
 insertasi 3 0
 troncasi 2 0
+rovesciasi 9 0
+prefissasi 4 1
